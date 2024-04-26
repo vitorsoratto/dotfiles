@@ -1,0 +1,12 @@
+[core]
+	autocrlf = false
+	eol = lf
+[pull]
+	rebase = false
+[init]
+	defaultBranch = main
+[user]
+	email = vitorsoratto@users.noreply.github.com
+	name = Vitor Soratto
+[hub]
+	prococol = ssh
