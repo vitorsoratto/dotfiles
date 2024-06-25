@@ -472,6 +472,7 @@ require('lazy').setup({
       --  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+      capabilities.textDocument.completion.completionItem.snippetSupport = true
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -513,6 +514,12 @@ require('lazy').setup({
         },
       }
 
+      local lspconfig = require 'lspconfig'
+      lspconfig.emmet_ls.setup {
+        capabilities = capabilities,
+        filetypes = { 'html', 'css', 'scss', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'blade', 'php' },
+      }
+
       -- Ensure the servers and tools above are installed
       --  To check the current status of installed tools and/or manually install
       --  other tools, you can run
@@ -526,6 +533,8 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'tailwindcss-language-server', -- Used for Tailwind CSS
+        'prettier', -- Used for formatting JavaScript, TypeScript, etc.
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -548,6 +557,17 @@ require('lazy').setup({
 
   { -- Autoformat
     'stevearc/conform.nvim',
+    keys = {
+      {
+        -- Customize or remove this keymap to your liking
+        '<C-S-f>',
+        function()
+          require('conform').format { async = true, lsp_fallback = true }
+        end,
+        mode = '',
+        desc = 'Format buffer',
+      },
+    },
     opts = {
       notify_on_error = false,
       format_on_save = function(bufnr)
@@ -556,6 +576,7 @@ require('lazy').setup({
         -- languages here or re-enable it for the disabled ones.
         local disable_filetypes = { c = true, cpp = true }
         return {
+
           timeout_ms = 500,
           lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
         }
@@ -564,6 +585,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         python = { 'isort', 'black' },
+        blade = { 'blade-formatter' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
